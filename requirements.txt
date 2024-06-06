@@ -1,0 +1,4 @@
+pyautogui
+keyboard
+websocket-client
+python-dotenv
