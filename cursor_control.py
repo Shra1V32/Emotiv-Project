@@ -15,6 +15,7 @@ cortex = Cortex()
 
 async def set_up(cortex):
     # await cortex.inspectApi()
+    # If there exists a token file, load the token from the file
     print("** USER LOGIN **")
     await cortex.get_user_login()
     print("** GET CORTEX INFO **")
@@ -23,8 +24,13 @@ async def set_up(cortex):
     await cortex.has_access_right()
     print("** REQUEST ACCESS **")
     await cortex.request_access()
-    print("** AUTHORIZE **")
-    await cortex.authorize()
+    # print("** AUTHORIZE **")
+    # await cortex.authorize()
+    print("** GET TOKEN **")
+    await cortex.get_token()
+    if not cortex.auth_token:
+        print("Auth failed")
+        return
     print("** GET LICENSE INFO **")
     await cortex.get_license_info()
     print("** QUERY HEADSETS **")

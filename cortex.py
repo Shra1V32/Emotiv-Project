@@ -44,6 +44,20 @@ class Cortex(object):
         self.packet_count = 0
         self.id_sequence = 0
 
+    async def get_token(self):
+        # Don't re-authorize if we already have a token
+        # The token expires for every 72 hours
+        if os.path.exists("auth.json"):
+            print("*** Found Cached Token ***")
+            f = open("auth.json", "r")
+            data = json.load(f)
+
+            if self.to_epoch() < data["expires"]:
+                self.auth_token = data["token"]
+                print("*** Using Cached Token ***")
+                return
+        await self.authorize()
+
     def parse_client_id_file(self):
         """
         Parse a client_id file for client_id and client secret.
@@ -195,6 +209,15 @@ class Cortex(object):
         resp = await self.send_command("authorize", auth=False, **params)
         logger.debug(f"{__name__} resp:\n{resp}")
         self.auth_token = resp["result"]["cortexToken"]
+
+        self.token_dict = {
+            "token": f"{self.auth_token}",
+            "expires": self.to_epoch() + (72 * 60 * 60 * 1000) - (60),
+        }
+
+        # Save the cortex token upon successful authorization
+        with open("auth.json", "w") as f:
+            json.dump(self.token_dict, f)
 
     async def get_cortex_info(self):
         resp = await self.send_command("getCortexInfo", auth=False)
